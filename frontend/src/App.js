@@ -5,6 +5,7 @@ import BlogDetail from './components/BlogDetail';
 import Login from './components/Login';
 import Register from './components/Register';
 import BlogForm from './components/BlogForm';
+import MyBlogs from './components/MyBlogs';
 
 function App() {
   const [blogs, setBlogs] = useState([]);
@@ -13,7 +14,7 @@ function App() {
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [user, setUser] = useState(null);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
-  const [showBlogForm, setShowBlogForm] = useState(false);
+  const [currentView, setCurrentView] = useState('feed'); // 'feed', 'write', or 'my-blogs'
 
   useEffect(() => {
     // Check if user is already logged in
@@ -49,25 +50,26 @@ function App() {
   const handleLoginSuccess = (userData) => {
     setUser(userData);
     setAuthMode('login');
-    setShowBlogForm(false);
+    setCurrentView('feed');
   };
 
   const handleRegisterSuccess = (userData) => {
     setUser(userData);
     setAuthMode('login');
-    setShowBlogForm(false);
+    setCurrentView('feed');
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    setShowBlogForm(false);
+    setCurrentView('feed');
+    fetchBlogs();
   };
 
   const handleBlogCreated = (newBlog) => {
     setBlogs([newBlog, ...blogs]);
-    setShowBlogForm(false);
+    setCurrentView('feed');
   };
 
   // If user is not logged in, show auth forms
@@ -127,27 +129,50 @@ function App() {
           </div>
           <div className="user-menu">
             <span>Welcome, {user.name}!</span>
-            <button className="btn-primary" onClick={() => setShowBlogForm(!showBlogForm)}>
-              {showBlogForm ? 'Cancel' : 'Write Blog'}
-            </button>
             <button className="btn-danger" onClick={handleLogout}>
               Logout
             </button>
           </div>
         </div>
+        <nav className="nav-menu">
+          <button
+            className={currentView === 'feed' ? 'active' : ''}
+            onClick={() => setCurrentView('feed')}
+          >
+            📖 Feed
+          </button>
+          <button
+            className={currentView === 'write' ? 'active' : ''}
+            onClick={() => setCurrentView('write')}
+          >
+            ✍️ Write
+          </button>
+          <button
+            className={currentView === 'my-blogs' ? 'active' : ''}
+            onClick={() => setCurrentView('my-blogs')}
+          >
+            📋 My Blogs
+          </button>
+        </nav>
       </header>
 
       <div className="container">
-        {showBlogForm && (
+        {currentView === 'feed' && (
+          <>
+            {loading && <div className="loading">Loading blogs...</div>}
+            {error && <div className="error">{error}</div>}
+            {!loading && !error && (
+              <BlogList blogs={blogs} onBlogClick={handleBlogClick} />
+            )}
+          </>
+        )}
+
+        {currentView === 'write' && (
           <BlogForm onBlogCreated={handleBlogCreated} />
         )}
 
-        {loading && <div className="loading">Loading blogs...</div>}
-
-        {error && <div className="error">{error}</div>}
-
-        {!loading && !error && (
-          <BlogList blogs={blogs} onBlogClick={handleBlogClick} />
+        {currentView === 'my-blogs' && (
+          <MyBlogs user={user} />
         )}
       </div>
 

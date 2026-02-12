@@ -5,6 +5,16 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Get current user's blogs (protected)
+router.get('/user/my-blogs', protect, async (req, res) => {
+  try {
+    const blogs = await Blog.find({ author: req.userId }).populate('author', 'name email').sort({ createdAt: -1 });
+    res.json(blogs);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching your blogs', error: error.message });
+  }
+});
+
 // Get all blogs (public)
 router.get('/', async (req, res) => {
   try {
