@@ -1,6 +1,10 @@
 import React from 'react';
 
 function BlogDetail({ blog, onClose }) {
+  const authorName = typeof blog.author === 'object' ? blog.author.name : blog.authorName;
+  const dateString = blog.createdAt || blog.date;
+  const date = new Date(dateString).toLocaleDateString();
+
   return (
     <div className="modal" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -10,8 +14,8 @@ function BlogDetail({ blog, onClose }) {
         </div>
         
         <div className="blog-meta">
-          <span className="author">✍️ {blog.author}</span>
-          <span className="date">📅 {new Date(blog.date).toLocaleDateString()}</span>
+          <span className="author">✍️ {authorName}</span>
+          <span className="date">📅 {date}</span>
         </div>
 
         <div className="blog-content">
